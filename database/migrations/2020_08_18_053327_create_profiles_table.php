@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-
-class CreateProfileTable extends Migration
+// CreateProfilesTableクラスはMigrationクラスを継承する
+class CreateProfilesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,10 @@ class CreateProfileTable extends Migration
      */
     public function up()
     {
-        Schema::create('profile', function (Blueprint $table) {
+        // profilesという名前のテーブルを作成
+        Schema::create('profiles', function (Blueprint $table) {
             $table->bigIncrements('id');
+            // stringは文字列型のカラム
             $table->string('name');
             $table->string('gender');
             $table->string('hobby');
@@ -30,6 +32,7 @@ class CreateProfileTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('profile');
+        // ロールバック時、profilesという名前のテーブルが存在すれば削除する
+        Schema::dropIfExists('profiles');
     }
 }

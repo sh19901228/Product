@@ -1,7 +1,6 @@
 {{-- layouts/admin.blade.phpを読み込む --}}
 @extends('layouts.admin')
 
-
 {{-- admin.blade.phpの@yield('title')に'ニュースの新規作成'を埋め込む --}}
 @section('title', 'ニュースの新規作成')
 
@@ -12,9 +11,11 @@
             <div class="col-md-8 mx-auto">
                 <h2>ニュース新規作成</h2>
                 <form action="{{ action('Admin\NewsController@create') }}" method="post" enctype="multipart/form-data">
-
+                    <!--countメソッド：配列の中の個数を返す-->
+                    <!--もしエラーが1つでもある場合、それら全てのエラーを$eに代入し、その中身をリスト表示する-->
                     @if (count($errors) > 0)
                         <ul>
+                            <!--$erros->all()は、バリデーションの中のチェックで発生したエラー情報が配列として保持されている-->
                             @foreach($errors->all() as $e)
                                 <li>{{ $e }}</li>
                             @endforeach

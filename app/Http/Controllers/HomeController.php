@@ -25,4 +25,10 @@ class HomeController extends Controller
     {
         return view('home');
     }
+    
+    public function about()
+    {
+        // about.blade.phpファイルを表示させる
+        return view('about');
+    }
 }
