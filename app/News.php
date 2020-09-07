@@ -3,10 +3,10 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-// NewsクラスはModelクラスを継承
+// NewsクラスはModelクラス(Modelにsaveメソッドが定義されている)を継承
 class News extends Model
 {
-    // 複数代入時にIDの代入を許可しない
+    // 複数代入時にIDの代入を許可しない、IDは1つだけ
     protected $guarded = array('id');
     // 以下の配列をバリデーションルールとして定義する
     public static $rules = array(
@@ -15,10 +15,10 @@ class News extends Model
         // 本文は必須項目
         'body' => 'required',
     );
-     // historiesメソッドを呼び出す、つまりNewsモデルに関連付けを行う
+     // historiesメソッドを呼び出す
     public function histories()
     {
-    // Historyモデルも所有している
+    // newsテーブルに関連付いているhistoriesテーブルを全て取得する
       return $this->hasMany('App\History');
 
     }

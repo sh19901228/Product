@@ -17,30 +17,30 @@ class NewsController extends Controller
         return view('admin.news.create');
     }
     
-    // Requestクラスから取得したデータ(ユーザーから送られる情報全て)が入っている$request
+    // Requestクラス(設計図)をもとにして作られたデータ(フォームで入力した情報だけでなく、ユーザーから送られる全ての情報)が入っている$requestインスタンス
     public function create(Request $request)
     {
-    // 上記の$requestデータをNewsモデルの$rulesを呼び出してバリデーションを実行
+    // 上記の$requestデータをNewsモデルの配列$rules(タイトルと本文は必須項目)を呼び出してバリデーションを実行
     $this->validate($request, News::$rules);
-    // Newsというインスタンス(レコード)を$newsに代入
+    // バリデーションでエラーが無ければ、Newsモデル(IDは自動生成、タイトル、本文)を$news(newsテーブル、厳密にはレコード)に代入
     $news = new News;
     // フォームでユーザーが入力したデータを$formに代入
     $form = $request->all();
-    // フォームから画像が送信されてきたら
+    // ユーザーが入力したデータ($form)から画像が送信されてきたら
       if (isset($form['image'])) {
         // 画像を読み込んで、public/imageディレクトリに保存し、$pathに代入
         $path = $request->file('image')->store('public/image');
-        // Newsテーブルのimage_pathカラムに$path(public/image/〇〇〇.jpg)のファイル名だけを代入
+        // newsテーブルのimage_pathカラムに$path(public/image/〇〇〇.jpg)のファイル名だけを代入
         $news->image_path = basename($path);
       } else {
-        // 画像が送信されてこなかったら、Newsテーブルのimage_pathカラムにnullを代入する
+        // 画像が送信されてこなかったら、newsテーブルのimage_pathカラムにnullを代入する
           $news->image_path = null;
       }
     // フォームから送信されてきた_tokenを削除する
     unset($form['_token']);
     // フォームから送信されてきたimageを削除する
     unset($form['image']);
-    // $formを$newsテーブルに代入し、保存する
+    // $formの中のプロパティ(タイトル、本文、image_path)にデータが入ったので、newsテーブルに代入し、保存する
     $news->fill($form);
     $news->save();
     // admin/news/create.blade.phpにリダイレクトする
@@ -54,11 +54,11 @@ class NewsController extends Controller
       $cond_title = $request->cond_title;
       // 検索ボックスでユーザーが検索したら
       if ($cond_title != '') {
-          // Newsテーブルの中のtitleカラムで$cond_title(検索した文字)に一致するレコードを取得
+          // newsテーブルの中のtitleカラムで$cond_title(検索した文字)に一致するレコードを取得
           // 取得したレコードを$posts変数に代入
           $posts = News::where('title', $cond_title)->get();
       } else {
-          // 検索ボックスで検索していなかったら、Newsテーブルのすべてのレコードを取得する
+          // 検索ボックスで検索していなかったら、newsテーブルのすべてのレコードを取得し、$postsに代入
           $posts = News::all();
       }
       // admin/news/index.blade.phpを表示する
@@ -68,9 +68,9 @@ class NewsController extends Controller
     // 編集画面
     public function edit(Request $request)
     {
-      // Newsモデルからユーザーデータの中のIDを取得し、$newsに代入
+      // Newsモデル(保存してあるユーザーデータ)の中のIDを取得し、$newsテーブルに代入
       $news = News::find($request->id);
-      // $newsの中にデータが無ければ、404エラーを表示させる
+      // newsテーブルの中にデータが無ければ、404エラーを表示させる
       if (empty($news)) {
         abort(404);    
       }
