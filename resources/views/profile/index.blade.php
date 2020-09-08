@@ -1,5 +1,8 @@
 @extends('layouts.pfront')
 
+{{-- pfront.blade.phpの@yield('title')に'記事一覧'を埋め込む --}}
+@section('title', '記事一覧')
+
 @section('content')
     <div class="container">
         <hr color="#c0c0c0">
