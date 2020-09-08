@@ -6,32 +6,6 @@
 @section('content')
     <div class="container">
         <hr color="#c0c0c0">
-        @if (!is_null($headline))
-            <div class="row">
-                <div class="headline col-md-10 mx-auto">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h1 class="date">{{ str_limit($headline->updated_at->format('Y年m月d日'), 20) }}</h1>
-                        </div>
-                            <div class="text col-md-6">
-                                <div class="col-md-6">
-                                  <p class="name mx-auto">{{ str_limit($headline->name, 20) }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                  <p class="gender mx-auto">{{ str_limit($headline->gender, 10) }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                  <p class="hobby mx-auto">{{ str_limit($headline->hobby, 100) }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                  <p class="introduction mx-auto">{{ str_limit($headline->introduction, 150) }}</p>
-                                </div>
-                            </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-        <hr color="#c0c0c0">
         <div class="row">
             <div class="posts col-md-8 mx-auto mt-3">
                 @foreach($posts as $post)
@@ -65,6 +39,5 @@
                 @endforeach
             </div>
         </div>
-    </div>
     </div>
 @endsection

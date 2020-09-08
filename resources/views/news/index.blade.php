@@ -2,7 +2,7 @@
 @extends('layouts.front')
 
 {{-- front.blade.phpの@yield('title')に'ニュース一覧'を埋め込む --}}
-@section('title', 'ニュース一覧')
+@section('title', 'NEWS一覧')
 
 <!--front.blade.phpの@yield('content')セクションに以下のタグを埋め込む-->
 @section('content')
