@@ -9,6 +9,7 @@ use App\News;
 // Historyモデルを使用する宣言
 use App\History;
 use Carbon\Carbon;
+use Storage;
 class NewsController extends Controller
 {
     public function add()
@@ -29,18 +30,20 @@ class NewsController extends Controller
     // ユーザーが入力したデータ($form)から画像が送信されてきたら
       if (isset($form['image'])) {
         // 画像を読み込んで、public/imageディレクトリに保存し、$pathに代入
-        $path = $request->file('image')->store('public/image');
-        // newsテーブルのimage_pathカラムに$path(public/image/〇〇〇.jpg)のファイル名だけを代入
-        $news->image_path = basename($path);
+        // $path = $request->file('image')->store('public/image');
+        $path = Storage::disk('s3')->putFile('/',$form['image'],'public');
+        // newsレコードのimage_pathカラムに$path(public/image/〇〇〇.jpg)のファイル名だけを代入
+        // $news->image_path = basename($path);
+        $news->image_path = Storage::disk('s3')->url($path);
       } else {
-        // 画像が送信されてこなかったら、newsテーブルのimage_pathカラムにnullを代入する
+        // 画像が送信されてこなかったら、newsレコードのimage_pathカラムにnullを代入する
           $news->image_path = null;
       }
     // フォームから送信されてきた_tokenを削除する
     unset($form['_token']);
     // フォームから送信されてきたimageを削除する
     unset($form['image']);
-    // $formの中のプロパティ(タイトル、本文、image_path)にデータが入ったので、newsテーブルに代入し、保存する
+    // $formの中のプロパティ(タイトル、本文、image_path)にデータが入ったので、$newsのインスタンスに代入し、保存する(保存して初めてnewsレコードが出来る)
     $news->fill($form);
     $news->save();
     // admin/news/create.blade.phpにリダイレクトする
@@ -54,11 +57,11 @@ class NewsController extends Controller
       $cond_title = $request->cond_title;
       // 検索ボックスでユーザーが検索したら
       if ($cond_title != '') {
-          // newsテーブルの中のtitleカラムで$cond_title(検索した文字)に一致するレコードを取得
+          // Newsモデルを利用して、newsテーブルにアクセスして、その中のtitleカラムで$cond_title(検索した文字)に一致するレコードを取得
           // 取得したレコードを$posts変数に代入
           $posts = News::where('title', $cond_title)->get();
       } else {
-          // 検索ボックスで検索していなかったら、newsテーブルのすべてのレコードを取得し、$postsに代入
+          // 検索ボックスで検索していなかったら、Newsモデルを利用して、newsテーブルにアクセスし、すべてのレコードを取得し、$postsに代入
           $posts = News::all();
       }
       // admin/news/index.blade.phpを表示する
@@ -68,7 +71,7 @@ class NewsController extends Controller
     // 編集画面
     public function edit(Request $request)
     {
-      // Newsモデル(保存してあるユーザーデータ)の中のIDを取得し、$newsテーブルに代入
+      // Newsモデルを利用して、newsテーブル(保存してあるユーザーデータ)の中のIDを取得し、$news(レコード)に代入
       $news = News::find($request->id);
       // newsテーブルの中にデータが無ければ、404エラーを表示させる
       if (empty($news)) {
@@ -81,22 +84,24 @@ class NewsController extends Controller
     // 編集画面から送信されたデータを処理
     public function update(Request $request)
     {
-      // $requestデータをNewsモデルrulesに沿ってValidationをかける
+      // $requestデータをNewsモデルのrulesに沿ってValidationをかける
       $this->validate($request, News::$rules);
-      // Newsモデルからユーザーデータの中のIDを取得し、$newsに代入
+      // Newsモデルを利用して、newsテーブル(保存してあるユーザーデータ)の中のIDを取得し、$news(レコード)に代入
       $news = News::find($request->id);
       // ユーザーが送信したフォームデータを$news_formに代入
       $news_form = $request->all();
       // 画像が送信されてきたら
       if (isset($news_form['image'])) {
         // 画像を読み込んで、public/imageディレクトリに保存し、$pathに代入
-        $path = $request->file('image')->store('public/image');
-        // Newsテーブルのimage_pathカラムに$path(public/image/〇〇〇.jpg)のファイル名だけを保存
-        $news->image_path = basename($path);
+        // $path = $request->file('image')->store('public/image');
+        $path = Storage::disk('s3')->putFile('/',$form['image'],'public');
+        // $news(レコード)のimage_pathカラムに$path(public/image/〇〇〇.jpg)のファイル名だけを保存
+        // $news->image_path = basename($path);
+        $news->image_path = Storage::disk('s3')->url($path);
         // 画像を削除(データベースに画像そのものを保存できない)
         unset($news_form['image']);
       } 
-      // 画像が送信されず、ユーザーデータの中のremove(削除ボタン)が送信されてきたら、newsテーブルのimage_pathカラムにnullを代入
+      // 画像が送信されず、ユーザーデータの中のremove(削除ボタン)が送信されてきたら、$news(レコード)のimage_pathカラムにnullを代入
       elseif (isset($request->remove)) {
         $news->image_path = null;
         // $news_formから送信されてきた'remove'を削除
@@ -109,9 +114,9 @@ class NewsController extends Controller
       
       // Historyモデルのデータを$historyに代入
       $history = new History;
-      // $newsのIDカラムを$historyのnews_idカラムに代入
+      // $news(レコード)のIDカラムを$history(レコード)のnews_idカラムに代入
       $history->news_id = $news->id;
-      // 現在時刻を$historyのedited_atカラムに代入
+      // 現在時刻を$history(レコード)のedited_atカラムに代入
       $history->edited_at = Carbon::now();
       // 保存する
       $history->save();
@@ -121,7 +126,7 @@ class NewsController extends Controller
     
     public function delete(Request $request)
     {
-      // Newsモデルからユーザーデータの中のIDを取得
+      // Newsモデルを利用して、newsテーブル(保存してあるユーザーデータ)の中のIDを取得し、$news(レコード)に代入
       $news = News::find($request->id);
       // 削除する
       $news->delete();
